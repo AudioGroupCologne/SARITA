@@ -2,7 +2,7 @@ function [N_grid, weights, name] = find_grid_type(grid_data)
  which_grids_to_compare = {'lebedev', 'gauss', 'fliege', 'extremal', 'equiangular', 'eigenmike32', 'hosma', 'zylia'};
  which_N_to_compare = [1:44];
  
- thresh = 1.0e-8;
+ thresh = 1.0e-6;
  found = 0;
  
  name_idx = 1;

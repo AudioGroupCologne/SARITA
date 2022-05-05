@@ -26,9 +26,9 @@ NFFT        	= 512;    % number of FFT bins
 c               = 343;
 look_directions = pi/2; % for binaural signal calculation
 % define sparsely measured grid
-N_sparse = 4;
+N_sparse = 5;
 grid_data_sparse = sph_grids.get_sampling_grid('lebedev', N_sparse);
-radius = 0.08;
+radius = 0.1;
 
 % define reference/upsampling grid
 N_ref = 29;
@@ -79,24 +79,32 @@ drirs_ref = real(ifft([DRTFs_ref, conj(fliplr(DRTFs_ref(:, 2:end-1)))], [], 2));
 %% (4) Perform Spatial Fourier Transform
 kr = (linspace(0, fs/2, NFFT/2 + 1) * 2 * pi * radius) / 343;  
 
-DRTFs_sparse_nm = sofia_stc(N_sparse, DRTFs_sparse, grid_data_sparse(:, 1:2));
-DRTFs_ref_nm    = sofia_stc(N_ref, DRTFs_ref, grid_data_ref(:, 1:2));
-DRTFs_ups_nm    = sofia_stc(N_ref, DRTFs_ups, grid_data_ref(:, 1:2));
+DRTFs_sparse_nm = sofia_stc(N_sparse, DRTFs_sparse, grid_data_sparse);
+DRTFs_ref_nm    = sofia_stc(N_ref, DRTFs_ref, grid_data_ref);
+DRTFs_ups_nm    = sofia_stc(N_ref, DRTFs_ups, grid_data_ref);
 
 radial_filters_sparse = sofia_mf(N_sparse, kr, array_config, soft_limit);
 radial_filters_ref    = sofia_mf(N_ref, kr, array_config, soft_limit);
 
 %% (5) Calculate binaural signals
 
-brir_sparse = sfe_binauralX_sh(drirs, grid_data_sparse, N_sparse, fs, radius, look_directions, 'decoder', 'subsampling');
-brir_ref    = sfe_binauralX_sh(drirs_ref, grid_data_ref, N_ref , fs, radius, look_directions, 'decoder', 'subsampling');
-brir_ups    = sfe_binauralX_sh(drirs_ups, grid_data_ref, N_ref, fs, radius, look_directions, 'decoder', 'subsampling');
+[B_l, B_r] = sofia_binauralX(DRTFs_sparse_nm, radial_filters_sparse, look_directions);
+brir_sparse = ifft(cat(3, [B_l, conj(B_l(:, end-1:-1:2, :))], ...
+                          [B_r, conj(B_r(:, end-1:-1:2, :))]),  [], 2, 'symmetric');
+
+[B_l, B_r] = sofia_binauralX(DRTFs_ref_nm, radial_filters_ref, look_directions);
+brir_ref = ifft(cat(3, [B_l, conj(B_l(:, end-1:-1:2, :))], ...
+                       [B_r, conj(B_r(:, end-1:-1:2, :))]),  [], 2, 'symmetric');
+                 
+[B_l, B_r] = sofia_binauralX(DRTFs_ups_nm, radial_filters_ref, look_directions);
+brir_ups = ifft(cat(3, [B_l, conj(B_l(:, end-1:-1:2, :))], ...
+                  [B_r, conj(B_r(:, end-1:-1:2, :))]),  [], 2, 'symmetric');
 
 NFFT = max([size(brir_sparse, 2), size(brir_ref, 2), size(brir_ups, 2)]);
 
-BRTFs_sparse = rfft(brir_sparse, NFFT);
-BRTFs_ref = rfft(brir_ref, NFFT);
-BRTFs_ups = rfft(brir_ups, NFFT);
+BRTFs_sparse = fft(brir_sparse, NFFT, 2); BRTFs_sparse = BRTFs_sparse(:, 1:NFFT/2 +1);
+BRTFs_ref = fft(brir_ref, NFFT, 2); BRTFs_ref = BRTFs_ref(:, 1:NFFT/2 +1);
+BRTFs_ups = fft(brir_ups, NFFT, 2); BRTFs_ups = BRTFs_ups(:, 1:NFFT/2 +1);
 
 %% (6) PLOTS
 if do_plots
