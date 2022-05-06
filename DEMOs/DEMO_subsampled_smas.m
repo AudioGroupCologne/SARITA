@@ -6,7 +6,7 @@
 clear all; close all; clc
 do_plots = 1;
 do_sound = 1;
-addpath('../SARITA_code');
+addpath('../../SARITA_dev/Sarita_code');%addpath('../SARITA_code');
 addpath(genpath('../dependencies'));
 addpath(genpath('../src'))
 
