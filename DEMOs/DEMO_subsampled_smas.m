@@ -74,19 +74,19 @@ if do_plots
     % plot binaural signals
     NFFT = 2^nextpow2(max([length(brirs_sparse), length(brirs_ref), length(brirs_ups)]));
     
-    BRTFs_sparse = fft(brirs_sparse, NFFT); BRTFs_sparse = BRTFs_sparse(:, 1:end/2+1);
-    BRTFs_ref = fft(brirs_ref, NFFT); BRTFs_ref = BRTFs_ref(:, 1:end/2+1);
-    BRTFs_ups = fft(brirs_ups, NFFT); BRTFs_ups = BRTFs_ups(:, 1:end/2+1);
+    BRTFs_sparse = fft(brirs_sparse, NFFT); BRTFs_sparse = BRTFs_sparse(:, 1:end/2+1, :);
+    BRTFs_ref = fft(brirs_ref, NFFT); BRTFs_ref = BRTFs_ref(:, 1:end/2+1, :);
+    BRTFs_ups = fft(brirs_ups, NFFT); BRTFs_ups = BRTFs_ups(:, 1:end/2+1, :);
     
-    % normalize signals to 500 Hz bin
-    bin = find(linspace(0, fs/2, NFFT) < 500, 1, 'last');
+    % normalize signals to 200 Hz bin
+    bin = find(linspace(0, fs/2, NFFT) < 200, 1, 'last');
     BRTFs_ref = BRTFs_ref ./ mean(abs(BRTFs_ref(1, bin, :)), 3);
     BRTFs_sparse = BRTFs_sparse ./ mean(abs(BRTFs_sparse(1, bin, :)), 3);
     BRTFs_ups = BRTFs_ups ./ mean(abs(BRTFs_ups(1, bin, :)), 3);
     
-    brirs_ref = irfft(BRTFs_ref);
-    brirs_sparse = irfft(BRTFs_sparse);
-    brirs_ups = irfft(BRTFs_ups);
+    brirs_ref = ifft([BRTFs_ref, conj(BRTFs_ref(:, end-1:-1:2, :))], [], 2, 'symmetric');
+    brirs_sparse = ifft([BRTFs_sparse, conj(BRTFs_sparse(:, end-1:-1:2, :))], [], 2, 'symmetric');
+    brirs_ups = ifft([BRTFs_ups, conj(BRTFs_ups(:, end-1:-1:2, :))], [], 2, 'symmetric');
     
     fig1 = figure(1);
     subplot(2, 3, 1)
