@@ -6,7 +6,7 @@
 clear all; close all; clc
 do_plots = 1;
 do_sound = 1;
-addpath('../../SARITA_dev/Sarita_code');%addpath('../SARITA_code');
+addpath('../../SARITA_dev/Sarita_code'); % addpath('../SARITA_code');
 addpath(genpath('../dependencies'));
 addpath(genpath('../src'))
 
@@ -15,7 +15,6 @@ disp('SARITA DEMO 2) Upsampling of measured SMA signals.')
 
 N_ref = 29;
 [drirs, grid_data_ref, fs, radius, ~] = sfe_import_sofa('DRIR_CR1_VSA_1202RS_R.sofa', 1);
-
 [brirs_dh, grid_data_brir, ~, ~, ~] = sfe_import_sofa('BRIR_CR1_KU_MICS_R.sofa');
 
 %% (2) define some parameters 
@@ -74,9 +73,9 @@ if do_plots
     % plot binaural signals
     NFFT = 2^nextpow2(max([length(brirs_sparse), length(brirs_ref), length(brirs_ups)]));
     
-    BRTFs_sparse = fft(brirs_sparse, NFFT); BRTFs_sparse = BRTFs_sparse(:, 1:end/2+1, :);
-    BRTFs_ref = fft(brirs_ref, NFFT); BRTFs_ref = BRTFs_ref(:, 1:end/2+1, :);
-    BRTFs_ups = fft(brirs_ups, NFFT); BRTFs_ups = BRTFs_ups(:, 1:end/2+1, :);
+    BRTFs_sparse = fft(brirs_sparse, NFFT, 2); BRTFs_sparse = BRTFs_sparse(:, 1:end/2+1, :);
+    BRTFs_ref = fft(brirs_ref, NFFT, 2); BRTFs_ref = BRTFs_ref(:, 1:end/2+1, :);
+    BRTFs_ups = fft(brirs_ups, NFFT, 2); BRTFs_ups = BRTFs_ups(:, 1:end/2+1, :);
     
     % normalize signals to 200 Hz bin
     bin = find(linspace(0, fs/2, NFFT) < 200, 1, 'last');
@@ -84,7 +83,8 @@ if do_plots
     BRTFs_sparse = BRTFs_sparse ./ mean(abs(BRTFs_sparse(1, bin, :)), 3);
     BRTFs_ups = BRTFs_ups ./ mean(abs(BRTFs_ups(1, bin, :)), 3);
     
-    brirs_ref = ifft([BRTFs_ref, conj(BRTFs_ref(:, end-1:-1:2, :))], [], 2, 'symmetric');
+    brirs_ref = cat(3, ifft([BRTFs_ref(:, :, 1), conj(BRTFs_ref(:, end-1:-1:2, 1))], [], 2, 'symmetric'), ...
+                       ifft([BRTFs_ref(:, :, 2), conj(BRTFs_ref(:, end-1:-1:2, 2))], [], 2, 'symmetric'));
     brirs_sparse = ifft([BRTFs_sparse, conj(BRTFs_sparse(:, end-1:-1:2, :))], [], 2, 'symmetric');
     brirs_ups = ifft([BRTFs_ups, conj(BRTFs_ups(:, end-1:-1:2, :))], [], 2, 'symmetric');
     
@@ -111,9 +111,9 @@ if do_plots
     subplot(2, 3, [4, 5, 6])  
         
         % 3rd octave smoothing 
-        BRTFs_sparse_smoothed = AKfractOctSmooth(squeeze(BRTFs_sparse(:, :, 1)).', 'amp', fs).';
-        BRTFs_ref_smoothed = AKfractOctSmooth(squeeze(BRTFs_ref(:, :, 1)).', 'amp', fs).';
-        BRTFs_ups_smoothed = AKfractOctSmooth(squeeze(BRTFs_ups(:, :, 1)).', 'amp', fs).';
+        BRTFs_sparse_smoothed = AKfractOctSmooth(squeeze(BRTFs_sparse(1, :, 1)).', 'amp', fs).';
+        BRTFs_ref_smoothed = AKfractOctSmooth(squeeze(BRTFs_ref(1, :, 1)).', 'amp', fs).';
+        BRTFs_ups_smoothed = AKfractOctSmooth(squeeze(BRTFs_ups(1, :, 1)).', 'amp', fs).';
         
         semilogx(linspace(5*eps, fs/2, size(BRTFs_sparse, 2)), 20*log10(abs(BRTFs_sparse_smoothed(1, :))), 'Color', [0.8, 0.8, 0.8], 'LineWidth', 3)
         hold on;
@@ -136,9 +136,6 @@ if do_sound
     % load drum test signal
     [testSignal, ~] = audioread('../src/test_signals/MARA_LE_DRUMS.wav');
     clear bin_signal_*
-    % load hpc
-    obj = load('../src/HPCs/Sennheiser_HD650_KU100_sigma.mat');
-    testSignal = conv(testSignal, obj.hpc_min_sigma);
     
     bin_signal_sparse(:, 1) = conv(testSignal(200:200+ 5*fs, :), brirs_sparse(1, :, 1));
     bin_signal_sparse(:, 2) = conv(testSignal(200:200+ 5*fs, :), brirs_sparse(1, :, 2));
