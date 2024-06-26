@@ -26,7 +26,7 @@ function [N_grid, weights, name] = find_grid_type(grid_data)
                 fprintf('---------------------------------------\n')
                 fprintf('Found N=%d %s grid\n', N_sg, name);
                 found = 1;
-           end
+            end
          end
          n_idx = n_idx + 1;
      end

@@ -7,8 +7,9 @@ function [grid_data, num_nodes, N_sg, radius] = get_sampling_grid( ...
 % Parameter:
 % ------------
 %    grid_type:     available grids: 'gauss', 'lebedev', 'fliege',
-%                                    'eigenmike32', 'hosma', 'zylia'
-%                                    'horizontal', 'extremal', 'equiangular'
+%                                    'eigenmike32'/'EM32', 'hosma', 'zylia'
+%                                    'horizontal' / 'EMA', 'extremal', 'equiangular'
+%                                    'eigenmike64' / 'EM64'
 %    N:             desired order N of the sampling scheme
 %    type:          string 'rad' or 'deg' {default: deg}
 %    convention:    'col' : theta ranging from 0 to 180, as it is used by
@@ -28,7 +29,7 @@ function [grid_data, num_nodes, N_sg, radius] = get_sampling_grid( ...
 %   N_sg: order of the sampling scheme
 %
 %   radius: radius of the spherical microphone array in case its specified
-%           by the sampling scheme
+%           by the sampling scheme. 
 %
 % Dependencies:
 % -------------
@@ -75,7 +76,7 @@ function [grid_data, num_nodes, N_sg, radius] = get_sampling_grid( ...
        if any(strcmpi(grid_type, {'gauss', 'lebedev', 'fliege', 'extremal', 'equiangular'}))
             N = 1;
             disp('WARNING: sampling grid order N is not specified, use N=1');
-       elseif strcmpi(grid_type, 'eigenmike32')
+       elseif strcmpi(grid_type, 'eigenmike32') || strcmpi(grid_type, 'EM32') 
             N = 4;
             disp('WARNING: eigenmike32 is for order N=4');
        elseif strcmpi(grid_type, 'zylia')
@@ -87,6 +88,9 @@ function [grid_data, num_nodes, N_sg, radius] = get_sampling_grid( ...
        elseif any(strcmp(grid_type, {'EMA', 'horizontal'}))
             disp('WARNING: No number of sampling points specified for pure horizontal grid.\n Calculate 360 equidistant points along the horizontal plane.\n');
             N = 360;
+        elseif strcmpi(grid_type, 'eigenmike64') || strcmpi(grid_type, 'EM64') 
+            N = 6;
+            disp('WARNING: eigenmike64 is for order N=6');
        end
     end
     if nargin < 3 || isempty(type)
@@ -168,7 +172,7 @@ function [grid_data, num_nodes, N_sg, radius] = get_sampling_grid( ...
         N_sg  = N;
         radius = [];
 
-    elseif strcmpi(grid_type, 'eigenmike32')
+    elseif strcmpi(grid_type, 'eigenmike32') || strcmpi(grid_type, 'EM32') 
         if ~isempty(N) && N ~= 4
             disp('WARNING: Eigenmike just supports 32 sampling point grid, for SH processing up to order 4.')
         end
@@ -177,6 +181,15 @@ function [grid_data, num_nodes, N_sg, radius] = get_sampling_grid( ...
         num_nodes = 32;
         N_sg = 4;
         radius = 0.042;
+
+    elseif strcmpi(grid_type, 'eigenmike64') || strcmpi(grid_type, 'EM64') 
+        if ~isempty(N) && N ~= 6
+            disp('WARNING: Eigenmike just supports 64 sampling point grid, for SH processing up to order 6.')
+        end
+        [grid_data, radius] = getEigenmike64Nodes();
+        grid_data(:, 2) = pi/2 - grid_data(:, 2);
+        num_nodes = 64;
+        N_sg = 6;
 
     elseif strcmpi(grid_type, 'hosma')
         if ~isempty(N) && N ~= 7
