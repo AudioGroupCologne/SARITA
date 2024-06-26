@@ -43,17 +43,8 @@
 %        Department of Acoustics and Audio Signal Processing
 % 
 %
-% versioning:
-%
-% 03.11.2020 (TL):
-% 28.09.2021 (CP): performance improvements: change loop order(frame-based/channel based. 
-%                                            precalculate neighbor ids and weights 
-% 22.12.2021 (CP): avoid negative time shifts
-% 30.12.2021 (CP): add frame_overlap parameter required for streaming-based processing
-% 03.01.2021 (TL): clean up, remove struct, implement varagin parameter
-% 07.01.2021 (TL): pass SMA signals in time domain and coordinates in radiants
-% 31.01.2021 (TL): ---- version for listening experiment -----
-% 07.04.2021 (TL): refactoring
+% 31.01.2021: ---- version for IEEE listening experiment -----
+% latest update 20.07.23 Tim Lübeck
 
 function [drirs_upsampled, DRTFs_ups] = Sarita_upsampling(drirs, source_grid, target_grid, radius, varargin)
 % check inputs
@@ -117,6 +108,7 @@ win = [hannwin(1:length(hannwin)/2), ...
 num_neighbors_dense_grid       = zeros(length(target_grid));    % Number of nearest neighbors for each sampling point
 idx_neighbors_dense_grid       = zeros(length(target_grid), 4); % Indices of neighbors of each sampling point (max 4)
 weights_neighbors_dense_grid   = zeros(length(target_grid), 4); % Weights of neighbors of each sampling point 
+max_shifts                     = zeros(length(target_grid), 1); % Maximum shift in each sampling point 
 neighbors_combinations         = zeros(2, 0);                   % Array containing all combinations of nearest neighbors
 combination_ptr                = zeros(2, 0);                   % Array describing which neighborsCombination is required for each the cross correlations   
  
