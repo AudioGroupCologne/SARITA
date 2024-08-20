@@ -54,8 +54,8 @@
 %
 % [1] 
 %
-%  (C)   2020 CP,  Christoph P?rschmann
-%        TH K?ln - University of Applied Sciences
+%  (C)   2024,  Tim Luebeck & Christoph Poerschmann
+%        TH Koeln - University of Applied Sciences
 %        Institute of Communications Engineering
 %        Department of Acoustics and Audio Signal Processing
 %
@@ -144,15 +144,21 @@ for dense_idx = 1:size(target_grid, 1)
     % calculate the maximum timeshifts between all next neighbor
     % candidates and all combinations next neighbors
     for nodeIndex = 2:length(neighborsIndex)   
-        angle = acos(dot(sparse_grid_cart(neighborsIndex(1),:), sparse_grid_cart(neighborsIndex(nodeIndex),:))); % get angle between sampling points
-        maxShift_dense(dense_idx,nodeIndex-1) = abs(ceil(angle * radius*fs/c)); % calculate the maximum shift                        
+        % angle between sampling points
+        angle = acos(dot(sparse_grid_cart(neighborsIndex(1), :), ...
+                         sparse_grid_cart(neighborsIndex(nodeIndex), :))); 
+        % calculate the maximum shift                        
+        maxShift_dense(dense_idx,nodeIndex-1) = abs(ceil(angle * radius*fs/c)); 
 
-        % Determine combinations of nearest neighbors
-        compareEntries = ismember(neighbors_combinations, [neighborsIndex(1) neighborsIndex(nodeIndex)]');
+        % determine combinations of nearest neighbors
+        compareEntries = ismember(neighbors_combinations, ...
+                                  [neighborsIndex(1), neighborsIndex(nodeIndex)]');
+
         if ~isempty(compareEntries)            
             if (max(compareEntries(1, :) .* compareEntries(2, :))  == 0)                 
                 % entry does not exist
-                neighbors_combinations = [neighbors_combinations, [neighborsIndex(1) neighborsIndex(nodeIndex)]'];
+                neighbors_combinations = [neighbors_combinations, ...
+                                          [neighborsIndex(1), neighborsIndex(nodeIndex)]'];
                 combination_ptr = [combination_ptr, [length(neighbors_combinations(1,:)) 1]'];
             else
                 % entry already exist, just store the correct reference in
