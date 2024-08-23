@@ -8,12 +8,12 @@
 
 clear all; close all; clc
 
-addpath('../../SARITA_dev/Sarita_code');%addpath(genpath('../Sarita_code'));
+addpath(genpath('../Sarita_code'));
 addpath(genpath('../dependencies'));
 addpath(genpath('../src'))
 
 do_plots = 1;
-do_sound = 1;
+do_sound = 0;
 
 disp('SARITA DEMO 1) Upsampling of a simulated Plane wave.')
 

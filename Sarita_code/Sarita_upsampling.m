@@ -18,7 +18,7 @@
 %   f_transit:     {default: 0}  
 %   frame_length:  {default: 32}
 %   frame_overlap: {default: frame_length/2}
-%   c:             {default: 340}
+%   c:             {default: 344}
 %   fs:            {default: 48 kHz}
 %
 % Returns:
@@ -35,16 +35,17 @@
 % References:
 % -------------
 %
-% [1] 
+% [1] Luebeck, T., Arend, J.M., Poerschmann, C. (2019) 
+%     "Spatial Upsampling of Sparse Spherical Microphone Array Signals"
+%     IEEE/Transactions on Audio Speech and Language Processing
 %
-%  (C)   2020 CP,  Christoph Pörschmann
+%  (C)   2024,  Tim Lübeck & Christoph Pörschmann
 %        TH Köln - University of Applied Sciences
 %        Institute of Communications Engineering
 %        Department of Acoustics and Audio Signal Processing
 % 
 %
 % 31.01.2021: ---- version for IEEE listening experiment -----
-% latest update 20.07.23 Tim Lübeck
 
 function [drirs_upsampled, DRTFs_ups] = Sarita_upsampling(drirs, source_grid, target_grid, radius, varargin)
 % check inputs
@@ -56,7 +57,7 @@ input_params = {'f_transit', 'frame_length', 'frame_overlap', 'c', 'fs'};
 default.f_transit     = 0;
 default.frame_length  = 32; 
 default.frame_overlap = 0;
-default.c             = 340;
+default.c             = 344;
 default.fs            = 48e3;
 
 if mod(size(varargin, 2), 2)
