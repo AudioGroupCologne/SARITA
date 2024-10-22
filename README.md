@@ -9,7 +9,7 @@
 
 ## Real-time implementation 
 A repository for a real-time VST plugin:
-https://github.com/AudioGroupCologne/SARITA
+https://github.com/AudioGroupCologne/SARITA_realtime
 
 ## Contact
 Tim Lübeck <br>
